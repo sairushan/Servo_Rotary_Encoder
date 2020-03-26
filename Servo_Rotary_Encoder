@@ -1,0 +1,66 @@
+// Subscribe to DIY TECH TUBE on YouTube
+//https://www.youtube.com/channel/UCEyn2Fu4Qohe4ZOsPzmvj-A/
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+Servo myservo; 
+#define outputA 6 //CLK pin
+#define outputB 7 //DT pin
+
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //I2C for LCD
+int pos = 90; //Initial position for the servo and the rotary encoder
+int aState;
+int aLastState;  
+int sens = 1; //Adjust the sensitivity of the Rotary encoder
+
+void setup() 
+{
+
+lcd.begin(16,2);//WE define our LCD 16 columns and 2 rows
+lcd.backlight();//Power on the back light
+pinMode (outputA,INPUT);
+pinMode (outputB,INPUT);
+lcd.begin(16,2);//Starrt LCD communication
+lcd.backlight();//turn LCD backlight ON
+lcd.setCursor(0,0); 
+lcd.print("Current Pos:90");
+aLastState = digitalRead(outputA);
+myservo.attach(9);
+myservo.write(pos); 
+}
+.p[
+void loop() { 
+
+   aState = digitalRead(outputA); // Reads the "current" state of the outputA
+   // If the previous and the current state of the outputA are different, that means a Pulse has occured
+   if (aState != aLastState){     
+     // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
+     if (digitalRead(outputB) != aState) { 
+       pos +=sens;
+     } else {
+       pos -=sens;
+     }
+     
+  if((pos>=0)&&(pos<=180)) // If the range of the postion is within the Servo's range, we update the servo's position
+  {
+     lcd.setCursor(12,0); 
+      lcd.print(pos); // Prints the Position
+      lcd.print(' ');
+      myservo.write(pos);
+      lcd.setCursor(0,1); 
+     lcd.print("             "); // clears the second row
+  }
+  else
+  {
+    lcd.setCursor(0,1); 
+     lcd.print("Out of Range"); 
+  }
+       
+ 
+    
+     
+       
+   } 
+   aLastState = aState; // Updates the previous state of the outputA with the current state
+ }
